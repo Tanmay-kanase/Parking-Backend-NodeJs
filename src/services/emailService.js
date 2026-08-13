@@ -16,7 +16,12 @@ const transporter = nodemailer.createTransport({
 // In-memory OTP store (matches the ConcurrentHashMap in EmailService.java)
 const otpStorage = new Map();
 
-export async function sendBookingConfirmation(toEmail, subject, htmlBody, booking) {
+export async function sendBookingConfirmation(
+  toEmail,
+  subject,
+  htmlBody,
+  booking,
+) {
   try {
     const pdfBuffer = await generateReceipt(booking);
     const icsBuffer = generateCalendarInvite(booking);

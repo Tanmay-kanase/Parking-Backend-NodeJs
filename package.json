@@ -5,8 +5,11 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
+    "build": "git clone ",
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch --runInBand"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -24,6 +27,11 @@
     "razorpay": "^2.9.5",
     "sockjs": "^0.3.24",
     "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0",
+    "mongodb-memory-server": "^10.1.2"
   },
   "engines": {
     "node": ">=18.0.0"

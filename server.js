@@ -7,7 +7,6 @@ import { createStompBroker } from "./src/ws/stompBroker.js";
 import { setBroadcaster as setBookingBroadcaster } from "./src/services/bookingService.js";
 import { setBroadcaster as setSlotLockBroadcaster } from "./src/controllers/slotLockController.js";
 import { expireOldBookings } from "./src/services/bookingService.js";
-
 async function main() {
   await connectDB();
 
@@ -23,10 +22,12 @@ async function main() {
 
   // Equivalent to @Scheduled(fixedRate = 60000) on BookingService#expireOldBookings
   cron.schedule("* * * * *", () => {
-    expireOldBookings().catch((e) => console.error("❌ expireOldBookings failed:", e));
+    expireOldBookings().catch((e) =>
+      console.error("❌ expireOldBookings failed:", e),
+    );
   });
 
-  server.listen(env.port, () => {
+  server.listen(env.port, "0.0.0.0", () => {
     console.log(`🚀 Server running on port ${env.port}`);
   });
 }

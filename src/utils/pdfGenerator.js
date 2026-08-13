@@ -51,7 +51,7 @@ export async function generateReceipt(booking) {
 
       // QR Code
       try {
-        const qrBuffer = await generateQRCodeImage(booking.slotId, 200);
+        const qrBuffer = await generateQRCodeImage(booking.bookingId, 200);
         const qrX = (doc.page.width - 100) / 2;
         doc.image(qrBuffer, qrX, doc.y, { width: 100, height: 100 });
       } catch (e) {

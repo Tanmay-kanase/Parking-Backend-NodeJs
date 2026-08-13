@@ -76,7 +76,10 @@ export async function loginUser(req, res) {
     res.cookie("token", result.token, COOKIE_OPTIONS);
 
     const { token, ...rest } = result;
-    res.json(rest);
+    res.json({
+      user: result.user,
+      token: result.token,
+    });
   } catch (e) {
     res.status(401).json({ message: e.message });
   }

@@ -15,11 +15,16 @@ import parkingSlotRoutes from "./routes/parkingSlotRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import slotLockRoutes from "./routes/slotLockRoutes.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 export function createApp() {
   const app = express();
 
   app.use(cors(corsOptions));
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+
   app.use(express.json());
   app.use(express.text({ type: ["text/plain", "application/*+text"] }));
   app.use(cookieParser());
@@ -43,6 +48,10 @@ export function createApp() {
   app.use("/api/slots", requireAuth, slotLockRoutes);
 
   app.use(errorHandler);
+  app.use(express.static(path.join(__dirname, "client", "dist")));
 
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
+  });
   return app;
 }
