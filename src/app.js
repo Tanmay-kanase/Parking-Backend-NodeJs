@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import { corsOptions } from "./config/cors.js";
 import { authMiddleware, requireAuth } from "./middleware/authMiddleware.js";
 import { errorHandler } from "./middleware/errorHandler.js";
-
+import verifyRoutes from "./routes/verifyRoutes.js";
 import healthRoutes from "./routes/healthRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import vehicleRoutes from "./routes/vehicleRoutes.js";
@@ -46,7 +46,7 @@ export function createApp() {
   app.use("/api/payments", requireAuth, paymentRoutes);
   app.use("/api/bookings", requireAuth, bookingRoutes);
   app.use("/api/slots", requireAuth, slotLockRoutes);
-
+  app.use("/api/verify", requireAuth, verifyRoutes);
   app.use(errorHandler);
   app.use(express.static(path.join(__dirname, "client", "dist")));
 
