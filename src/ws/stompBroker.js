@@ -63,7 +63,7 @@ export function createStompBroker(httpServer, { prefix = "/ws" } = {}) {
             buildFrame("CONNECTED", {
               version: "1.1",
               "heart-beat": "0,0",
-            })
+            }),
           );
           break;
         }
@@ -81,7 +81,9 @@ export function createStompBroker(httpServer, { prefix = "/ws" } = {}) {
         }
         case "DISCONNECT": {
           if (frame.headers.receipt) {
-            conn.write(buildFrame("RECEIPT", { "receipt-id": frame.headers.receipt }));
+            conn.write(
+              buildFrame("RECEIPT", { "receipt-id": frame.headers.receipt }),
+            );
           }
           conn.close();
           break;
@@ -103,18 +105,23 @@ export function createStompBroker(httpServer, { prefix = "/ws" } = {}) {
    * payload can be a string or an object (will be JSON.stringify-ed).
    */
   function convertAndSend(destination, payload) {
-    const body = typeof payload === "string" ? payload : JSON.stringify(payload);
+    const body =
+      typeof payload === "string" ? payload : JSON.stringify(payload);
 
     for (const { conn, subscriptions } of connections.values()) {
       for (const [subId, dest] of subscriptions.entries()) {
         if (dest === destination) {
           conn.write(
-            buildFrame("MESSAGE", {
-              destination,
-              subscription: subId,
-              "message-id": `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-              "content-type": "application/json",
-            }, body)
+            buildFrame(
+              "MESSAGE",
+              {
+                destination,
+                subscription: subId,
+                "message-id": `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+                "content-type": "application/json",
+              },
+              body,
+            ),
           );
         }
       }
