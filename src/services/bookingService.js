@@ -17,7 +17,10 @@ export function setBroadcaster(fn) {
 }
 
 function razorpayClient() {
-  return new Razorpay({ key_id: env.razorpay.keyId, key_secret: env.razorpay.keySecret });
+  return new Razorpay({
+    key_id: env.razorpay.keyId,
+    key_secret: env.razorpay.keySecret,
+  });
 }
 
 export async function createBooking(booking) {
@@ -27,16 +30,23 @@ export async function createBooking(booking) {
 // Equivalent to @Scheduled(fixedRate = 60000) expireOldBookings()
 export async function expireOldBookings() {
   const now = new Date();
-  const expiredBookings = await Booking.find({ status: "ACTIVE", endTime: { $lt: now } });
+  const expiredBookings = await Booking.find({
+    status: "ACTIVE",
+    endTime: { $lt: now },
+  });
 
   if (expiredBookings.length > 0) {
-    console.log(`Found ${expiredBookings.length} expired bookings. Updating status...`);
+    console.log(
+      `Found ${expiredBookings.length} expired bookings. Updating status...`,
+    );
 
     for (const booking of expiredBookings) {
       try {
         booking.status = "EXPIRED";
         await booking.save();
-        console.log(`Marked booking ${booking._id} as EXPIRED and freed slot ${booking.slotId}`);
+        console.log(
+          `Marked booking ${booking._id} as EXPIRED and freed slot ${booking.slotId}`,
+        );
       } catch (e) {
         console.log(`❌ Failed to update booking ${booking._id}: ${e.message}`);
       }
@@ -53,7 +63,10 @@ export async function getBookingById(bookingId) {
 }
 
 export async function updateBooking(booking) {
-  return Booking.findByIdAndUpdate(booking.bookingId, booking, { new: true, upsert: true });
+  return Booking.findByIdAndUpdate(booking.bookingId, booking, {
+    new: true,
+    upsert: true,
+  });
 }
 
 export async function deleteBooking(bookingId) {
@@ -71,28 +84,32 @@ export async function getBookingsByUserId(userId) {
 export async function completeBooking(request) {
   console.log("\n[DEBUG] === STARTING completeBooking ===");
   console.log(
-    `[DEBUG] Request data: OrderId=${request.orderId}, PaymentId=${request.paymentId}, SlotId=${request.slotId}`
+    `[DEBUG] Request data: OrderId=${request.orderId}, PaymentId=${request.paymentId}, SlotId=${request.slotId}`,
   );
 
   const isValid = verifySignature(
     request.orderId,
     request.paymentId,
     request.signature,
-    env.razorpay.keySecret
+    env.razorpay.keySecret,
   );
 
   if (!isValid) {
     throw new Error("Invalid payment signature");
   }
 
-  const existing = await paymentService.findByTransactionId(request.transactionId);
+  const existing = await paymentService.findByTransactionId(
+    request.transactionId,
+  );
   if (existing) {
     throw new Error("Duplicate payment detected");
   }
 
   console.log(`[DEBUG] 3. Validating slot locks for slotId: ${request.slotId}`);
   const owner = await slotLockService.getLockOwner(request.slotId);
-  console.log(`[DEBUG] 3. Redis getLockOwner result: ${owner} | Expected userId: ${request.userId}`);
+  console.log(
+    `[DEBUG] 3. Redis getLockOwner result: ${owner} | Expected userId: ${request.userId}`,
+  );
 
   if (!owner) {
     throw new Error("Slot lock has expired. Please try booking again.");
@@ -190,13 +207,13 @@ export async function completeBooking(request) {
   }).save();
 
   // 5. Send Email
-  try {
-    const subject = "Booking Confirmed!";
-    const content = emailTemplateService.generateBookingTemplate(savedBooking);
-    await emailService.sendBookingConfirmation(request.email, subject, content, savedBooking);
-  } catch (e) {
-    console.log("Email failed but booking successful");
-  }
+  // try {
+  //   const subject = "Booking Confirmed!";
+  //   const content = emailTemplateService.generateBookingTemplate(savedBooking);
+  //   await emailService.sendBookingConfirmation(request.email, subject, content, savedBooking);
+  // } catch (e) {
+  //   console.log("Email failed but booking successful");
+  // }
 
   try {
     const razorpayPayment = await razorpay.payments.fetch(request.paymentId);
@@ -212,7 +229,10 @@ export async function completeBooking(request) {
   await slotLockService.unlockSlot(request.slotId);
 
   if (broadcaster) {
-    broadcaster("/topic/slot-updates", JSON.stringify({ slotId: request.slotId, status: "BOOKED" }));
+    broadcaster(
+      "/topic/slot-updates",
+      JSON.stringify({ slotId: request.slotId, status: "BOOKED" }),
+    );
   }
 
   return savedBooking;
