@@ -27,7 +27,7 @@ async function main() {
     );
   });
 
-  server.listen(env.port, "0.0.0.0", () => {
+  server.listen(env.port, () => {
     console.log(`🚀 Server running on port ${env.port}`);
   });
 }
